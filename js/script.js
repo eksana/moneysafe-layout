@@ -30,8 +30,8 @@ financeForm.addEventListener('submit', (event) => {
     }
 
     financeAmount.textContent = `${amount.toLocaleString()} ₽`;
-    // console.log(typeOperation);
-    // console.time();
-    // console.timeEnd();
+    console.log(typeOperation);
+    console.time();
+    console.timeEnd();
 })
 
