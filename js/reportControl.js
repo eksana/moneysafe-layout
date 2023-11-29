@@ -1,4 +1,5 @@
 import { financeControl } from "./financeControl.js";
+import { generateChart } from "./generateChart.js";
 import { reformateDate } from "./helper.js";
 import { delData, getData } from "./servise.js";
 
@@ -9,11 +10,15 @@ const typesOperation = {
     income: "доход",
     expenses: "расход",
 };
+
+let actualData = [];
+
 const reportDates = document.querySelector('.report__dates');
 const financeReport = document.querySelector('.finance__report');
 const report = document.querySelector('.report');
 const reportClose = document.querySelector('.report__close');
 const reportOperatonList = document.querySelector('.report__operaton-list');
+const generateChartButton = document.querySelector('#generateChartButton');
 
 const closeReport = (e) => {
 
@@ -86,7 +91,7 @@ export const reportControl = () => {
             reportRow.remove();
             financeControl();
 
-            //clearChat();
+            clearChat();
         }
     });
 
@@ -121,8 +126,13 @@ export const reportControl = () => {
         const queryString = searchParams.toString();
 
         const url = queryString ? `/finance?${queryString}` : '/finance'
-        const data = await getData(url);
+        actualData = await getData(url);
         //console.log(data)
-        renderReport(data);
+        renderReport(actualData);
     });
 }
+
+generateChartButton.addEventListener('click', () => {
+    generateChart(actualData);
+
+})
