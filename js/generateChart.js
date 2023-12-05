@@ -1,4 +1,5 @@
 const reportChart = document.querySelector('.report__chart');
+let myChart;
 export const clearChat = () => {
     reportChart.textContent = '';
 
@@ -11,23 +12,80 @@ export const generateChart = (data) => {
 
     const chartLabel = [...new Set(data.map(item => item.date))];
 
-    //let accIncome = 0;
-    //let accExpenses = 0;
+    const reduceOperationDate = (arrDate) =>
+        chartLabel.reduce((acc, date) => {
 
-    const accIncome = chartLabel.reduce(date => {
+            const total = arrDate
+                .filter(item => item.date === date)
+                .reduce((acc, record) => acc + parseFloat(record.amount), 0);
+            acc[0] += total;
+            acc[1].push(acc[0])
+            return [acc[0], acc[1]]
+        }, [0, []]
+        );
 
-        const total = incomeData
-            .filter(item => item.date === date)
-            .reduce((acc, record) => acc + parseFloat(record.amount), 0);
-        return acc + total
-    }, 0)
 
-    const accExpenses = chartLabel.reduce(date => {
+    const [accIncome, incomeAmounts] = reduceOperationDate(incomeData);
 
-        const total = expensesData
-            .filter(item => item.date === date)
-            .reduce((acc, record) => acc + parseFloat(record.amount), 0);
-        return acc + total
-    }, 0)
-    console.log(accIncome, accExpenses);
+    const [accExpenses, expensesAmounts] = reduceOperationDate(expensesData);
+
+    //console.log(accIncome, accExpenses);
+    const balanceAmount = incomeAmounts.map(
+        (income, i) => income - expensesAmounts[i]
+
+    );
+    const canvasChart = document.createElement('canvas');
+    //canvas.id = 'myChart';
+    clearChat();
+    reportChart.append(canvasChart);
+
+    const ctx = canvasChart.getContext('2d');
+
+    if (myChart instanceof Chart) {
+        myChart.destroy();
+    }
+
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartLabel,
+            datasets: [
+                {
+                    label: "Доходы",
+                    data: incomeAmounts,
+                    borderWidth: 2,
+                    hidden: true,
+                },
+                {
+                    label: "Расходы",
+                    data: expensesAmounts,
+                    borderWidth: 2, hidden: true,
+                },
+                {
+                    label: "Баланс",
+                    data: balanceAmount,
+                    borderWidth: 2,
+                    hidden: false,
+                },
+            ],
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                },
+            },
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: "График финансов",
+
+                },
+                legend: {
+                    position: "top",
+                },
+            },
+        },
+    });
 };
